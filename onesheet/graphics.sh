@@ -31,9 +31,24 @@ ctlrender -force \
 #     -ctl $EDRHOME/ACES/CTL/odt_rec709_full_MAX_CLIP.ctl -param1 MAX 400.0 -param1 DISPGAMMA 2.2 \
 
 
-ociolutimage --extract --cubesize $CUBE --maxwidth 512 -input InverseTC_HALD.tiff --output InverseTC_HALD.spi3d
+#ociolutimage --extract --cubesize $CUBE --maxwidth 512 -input InverseTC_HALD.tiff --output InverseTC_HALD.spi3d
 
-ociobakelut --lut InverseTC_HALD.spi3d --format iridas_itx --cubesize $CUBE  InverseTC_HALD.cube
+#ociobakelut --lut InverseTC_HALD.spi3d --format iridas_itx --cubesize $CUBE  InverseTC_HALD.cube
 
 
 # ffmpeg -i OBL100-sharp.mov -i $EDRDATA/EXR/MIX/Plus2StretchHALD.tiff  -filter_complex "[0][1] haldclut, scale=1920x1080" -c:v libx264 -preset slow -crf 22 -c:a copy 400.mp4
+
+for filename in *_60.jpg; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.jpg}"
+
+
+    
+ convert $filename  InverseTC_HALD.tiff  -hald-clut   $cFile"-500.jpg"    
+      
+
+
+done
