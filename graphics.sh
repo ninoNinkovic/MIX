@@ -37,3 +37,13 @@ ociobakelut --lut InverseTC_HALD.spi3d --format iridas_itx --cubesize $CUBE  Inv
 
 
 # ffmpeg -i OBL100-sharp.mov -i $EDRDATA/EXR/MIX/Plus2StretchHALD.tiff  -filter_complex "[0][1] haldclut, scale=1920x1080" -c:v libx264 -preset slow -crf 22 -c:a copy 400.mp4
+
+#x265 --input $YUVFILE --input-depth 10 --input-res 3840x2160 --fps 24.0 \
+  #--profile main10 --level-idc 51 --no-high-tier --tune grain \
+  #--crf $crf   \
+  #-p medium  --bframes 12 -I 72 --psnr --sar 1 --range limited \
+  #--colorprim bt709 --transfer bt709 --colormatrix bt709 --chromaloc 1 \
+  #--repeat-headers  \
+  #-o x265-$YUVBASE-$crf.bin 2>&1 | tee logencoder-x265-$YUVBASE-$crf.txt
+
+# smpte-st-2084
