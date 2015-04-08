@@ -6,7 +6,7 @@ set -x
 usePython=false
 
 # Setup Output Directory
-OUTDIR="TEST_LUTS"
+OUTDIR="TEST_NUGGET"
 rm -rfv $OUTDIR
 mkdir -p $OUTDIR/Compare
 
@@ -50,7 +50,7 @@ $OIIO/bin/oiiotool /dev/shm/$cFile.exr \
         --tocolorspace $LUTSLOT -d uint16 --scanline  -o /dev/shm/$cFile".tiff"; \
       ctlrender -force -ctl $EDRHOME/ACES/CTL/null.ctl \
         /dev/shm/$cFile".tiff" -format tiff16 $OUTDIR/$cFile"-"$1".tiff"; \
-      rm -fv /dev/shm/$cFile.exr /dev/shm/$cFile".tiff" \
+      rm -fv /dev/shm/$cFile.exr /dev/shm/$cFile".tiff"    
 ) &
       
 c1=$[$c1 +1]
