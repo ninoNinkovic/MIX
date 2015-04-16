@@ -3,12 +3,15 @@ set -x
 #  !!!
 # Use python to make ctf?
 #
-usePython=false
+usePython=true
 
 # Setup Output Directory
 OUTDIR="TEST_LUTS"
-rm -rfv $OUTDIR
-mkdir -p $OUTDIR/Compare
+if [ "$usePython" = false ]; then
+	rm -rfv $OUTDIR
+	mkdir -p $OUTDIR/Compare
+fi
+
 
 
 function  TEST {
@@ -26,11 +29,12 @@ FILES=( "$EDRDATA/EXR/JKP/JKP_alps_0000275.exr" \
         "$EDRDATA/EXR/ICAS/ICAS_F65_night_0001005.exr" \
         "$EDRDATA/EXR/ICAS/ICAS_F65_night_0001135.exr" \
         "$EDRDATA/EXR/ICAS/ICAS_F65_night_0001495.exr" \
+        "foldover/SVU_16013_CTM_156479.000714.exr" \
       )
 
 # setup for parallel
 c1=0
-CMax=1
+CMax=4
 
 for filename in ${FILES[@]}; do
 
@@ -143,58 +147,69 @@ done
 CUBE=100
 
 
-# LMT011_P3PQ-1000nit
-LUTNAME="LMT011_P3PQ-1100nit"
+#
+# ACES v1 P3D65 with Gamma 2.4 800 nits
+#
+LUTNAME="ACESv1_P3D65_Gamma24"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
-MAX="1100.0"
-FUDGE="1.175"
-ociolutimage --generate --cubesize $CUBE --maxwidth 1000  --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+GAMMA="2.4"
+GAMMA_MAX="750.0"
+#### SETUP FOR ACES V1:  
+## Set Path for ACES v1
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+####
+ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 ctlrender -force \
-    -ctl $EDRHOME/ACES/transforms/ctl/lmt/lmt_aces_v0.1.1.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
-    -ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/CTLa1/ODT.Academy.P3D65_PQ_1000nits.a1.0.0.ctl  \
+    -ctl $EDRHOME/ACES/CTLa1/PQ2Gamma.ctl \
+      -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA -param1 legalRange 0  \
          lutimagePQ.exr $LUTSLOT.exr  
 
-#    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $MAX -param1 DISPGAMMA 2.4 \
-
-
-# Extract PQ shaper 3D LUT  ACES v0.7.1
+# Extract 3D LUT
 rm -fv $LUTSLOT.spi3d
-ociolutimage --extract --cubesize $CUBE --maxwidth 1000  --input $LUTSLOT.exr \
+ociolutimage --extract --cubesize $CUBE --input $LUTSLOT.exr \
   --output $LUTNAME".spi3d"
 cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
 
 if [ "$usePython" = false ]; then
-   TESTLMT $LUTNAME $LUTSLOT
+   TEST $LUTNAME $LUTSLOT
 fi
 
 if [ "$usePython" = true ]; then
 pushd .
-cd $EDRHOME/ACES/HPD/python
+cd $EDRHOME/ACES/HPD/python/aces
 echo $PWD
-python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
-   -o 3D.v011.v071.$LUTNAME.ctf  &
+rm -fv 3D.$LUTNAME.ctf
+python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   -c 3D.$LUTNAME.ctf  &
 popd
-fi
+fi 
 
-# P3PQ-1000nit
-LUTNAME="P3PQ-1100nit"
-LUTSLOT="ACES_PQ_2_ODT_LUT1"
-MAX="1100.0"
-FUDGE="1.175"
-ociolutimage --generate --cubesize $CUBE --maxwidth 1000  --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+#
+# ACES v0.7.1 P3D65 with Gamma 2.4 800 nits
+#
+LUTNAME="ACESv71_P3D65_Gamma24"
+LUTSLOT="ACES_PQ_2_ODT_LUT"
+GAMMA="2.4"
+GAMMA_MAX="800.0"
+MAX="800.0"
+FUDGE="1.11"
+#### SETUP FOR ACES V071:  
+## Set Path for ACES v1
+CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+####
+ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 ctlrender -force \
     -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
     -ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA\
          lutimagePQ.exr $LUTSLOT.exr  
-
-
-#    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $MAX -param1 DISPGAMMA 2.4 \
-
 
 # Extract PQ shaper 3D LUT  ACES v0.7.1
 rm -fv $LUTSLOT.spi3d
-ociolutimage --extract --cubesize $CUBE --maxwidth 1000  --input $LUTSLOT.exr \
+ociolutimage --extract --cubesize $CUBE --input $LUTSLOT.exr \
   --output $LUTNAME".spi3d"
 cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
 
@@ -206,22 +221,27 @@ fi
 
 if [ "$usePython" = true ]; then
 pushd .
-cd $EDRHOME/ACES/HPD/python
+cd $EDRHOME/ACES/HPD/python/aces
 echo $PWD
-python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
-   -o 3D.v011.v071.$LUTNAME.ctf  &
+rm -fv 3D.$LUTNAME.ctf
+python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   -c 3D.$LUTNAME.ctf  &
 popd
 fi
 
 
+
+#
+# Nugget default
+#
 # Demos HDR w/o LMT
 # $EDRHOME/Tools/demos/nugget/HDR_CPU
 # infiles, outfiles, first_frame, last_frame, odt_type(1=GD10_Rec709_MDR, 2=GD10_p3_d60_HDR)
 
-LUTNAME="GaryDemos10_P3D60_PQP3D65_HDR"
+LUTNAME="GaryDemos10_P3D65_HDR_Gamma24"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
 PEAK=1350.0
-PEAKGAMMA=1100.0
+PEAKGAMMA=1250.0
 ociolutimage --generate --cubesize 100 --maxwidth 1000 --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 
 $EDRHOME/Tools/demos/nugget/HDR_CPU lutimagePQ.exr $LUTSLOT.exr 0 0 2
@@ -235,11 +255,11 @@ CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/c
 ctlrender -force \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
     $LUTSLOT.exr -format exr16 temp1.exr
-#display temp1.exr &
 
 
 ctlrender -force \
     -ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \
+    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
     temp1.exr -format exr16 temp.exr 
 
@@ -265,74 +285,244 @@ fi
 
 if [ "$usePython" = true ]; then
 pushd .
-cd $EDRHOME/ACES/HPD/python
+cd $EDRHOME/ACES/HPD/python/aces
 echo $PWD
-python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
-   -o 3D.v011.v071.$LUTNAME.ctf  &
+rm -fv 3D.$LUTNAME.ctf
+python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   -c 3D.$LUTNAME.ctf  &
 popd
 fi
 
-# Demos HDR w/LMT
-# $EDRHOME/Tools/demos/nugget/HDR_CPU
-# infiles, outfiles, first_frame, last_frame, odt_type(1=GD10_Rec709_MDR, 2=GD10_p3_d60_HDR)
-
-LUTNAME="LMT_GaryDemos10_P3_D60_PQP3D65_HDR"
+#
+# ACES v0.7.1 P3D65 with PQ 1100 nits
+#
+LUTNAME="ACESv71_P3D65_PQ1100"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
-PEAK=1350.0
-PEAKGAMMA=1100.0
-ociolutimage --generate --cubesize 100 --maxwidth 1000 --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
-
-ctlrender -force \
-    -ctl $EDRHOME/ACES/transforms/ctl/lmt/lmt_aces_v0.1.1.ctl \
-         lutimagePQ.exr $LUTSLOT"x.exr"
- 
-
-$EDRHOME/Tools/demos/nugget/HDR_CPU $LUTSLOT"x.exr" $LUTSLOT.exr 0 0 2
-cp $LUTSLOT.exr temp0.exr
-
+MAX="1100.0"
+FUDGE="1.175"
 #### SETUP FOR ACES V071:  
 ## Set Path for ACES v1
 CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
 ####
-
+ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    $LUTSLOT.exr -format exr16 temp1.exr
-#display temp1.exr &
-
-
-ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    temp1.exr -format exr16 temp.exr 
-
-#    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
-
-#     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \    
-#display temp.exr &
-cp temp.exr $LUTSLOT.exr
-
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    -ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+         lutimagePQ.exr $LUTSLOT.exr  
 
 # Extract PQ shaper 3D LUT  ACES v0.7.1
 rm -fv $LUTSLOT.spi3d
-ociolutimage --extract --cubesize 100 --maxwidth 1000 --input $LUTSLOT.exr \
-  --output $LUTNAME".spi3d" 
+ociolutimage --extract --cubesize $CUBE --input $LUTSLOT.exr \
+  --output $LUTNAME".spi3d"
 cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
 
 
 if [ "$usePython" = false ]; then
-   TESTLMT $LUTNAME $LUTSLOT
+   TEST $LUTNAME $LUTSLOT
 fi
 
 
 if [ "$usePython" = true ]; then
 pushd .
-cd $EDRHOME/ACES/HPD/python
+cd $EDRHOME/ACES/HPD/python/aces
 echo $PWD
-python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
-   -o 3D.v011.v071.$LUTNAME.ctf  &
+rm -fv 3D.$LUTNAME.ctf
+python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   -c 3D.$LUTNAME.ctf  &
 popd
 fi
+
+
+## LMT011_P3PQ-1000nit
+#LUTNAME="LMT011_P3PQ-1100nit"
+#LUTSLOT="ACES_PQ_2_ODT_LUT"
+#MAX="1100.0"
+#FUDGE="1.175"
+#ociolutimage --generate --cubesize $CUBE --maxwidth 1000  --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/transforms/ctl/lmt/lmt_aces_v0.1.1.ctl \
+    #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    #-ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+         #lutimagePQ.exr $LUTSLOT.exr  
+
+##    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $MAX -param1 DISPGAMMA 2.4 \
+
+
+## Extract PQ shaper 3D LUT  ACES v0.7.1
+#rm -fv $LUTSLOT.spi3d
+#ociolutimage --extract --cubesize $CUBE --maxwidth 1000  --input $LUTSLOT.exr \
+  #--output $LUTNAME".spi3d"
+#cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
+
+#if [ "$usePython" = false ]; then
+   #TESTLMT $LUTNAME $LUTSLOT
+#fi
+
+#if [ "$usePython" = true ]; then
+#pushd .
+#cd $EDRHOME/ACES/HPD/python
+#echo $PWD
+#python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   #-o 3D.v011.v071.$LUTNAME.ctf  &
+#popd
+#fi
+
+## P3PQ-1000nit
+#LUTNAME="P3PQ-1100nit"
+#LUTSLOT="ACES_PQ_2_ODT_LUT1"
+#MAX="1100.0"
+#FUDGE="1.175"
+#ociolutimage --generate --cubesize $CUBE --maxwidth 1000  --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    #-ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+         #lutimagePQ.exr $LUTSLOT.exr  
+
+
+##    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $MAX -param1 DISPGAMMA 2.4 \
+
+
+## Extract PQ shaper 3D LUT  ACES v0.7.1
+#rm -fv $LUTSLOT.spi3d
+#ociolutimage --extract --cubesize $CUBE --maxwidth 1000  --input $LUTSLOT.exr \
+  #--output $LUTNAME".spi3d"
+#cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
+
+
+#if [ "$usePython" = false ]; then
+   #TEST $LUTNAME $LUTSLOT
+#fi
+
+
+#if [ "$usePython" = true ]; then
+#pushd .
+#cd $EDRHOME/ACES/HPD/python
+#echo $PWD
+#python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   #-o 3D.v011.v071.$LUTNAME.ctf  &
+#popd
+#fi
+
+
+## Demos HDR w/o LMT
+## $EDRHOME/Tools/demos/nugget/HDR_CPU
+## infiles, outfiles, first_frame, last_frame, odt_type(1=GD10_Rec709_MDR, 2=GD10_p3_d60_HDR)
+
+#LUTNAME="GaryDemos10_P3D60_PQP3D65_HDR"
+#LUTSLOT="ACES_PQ_2_ODT_LUT"
+#PEAK=1350.0
+#PEAKGAMMA=1100.0
+#ociolutimage --generate --cubesize 100 --maxwidth 1000 --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+
+#$EDRHOME/Tools/demos/nugget/HDR_CPU lutimagePQ.exr $LUTSLOT.exr 0 0 2
+#cp $LUTSLOT.exr temp0.exr
+
+##### SETUP FOR ACES V071:  
+### Set Path for ACES v1
+#CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+#####
+
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    #$LUTSLOT.exr -format exr16 temp1.exr
+##display temp1.exr &
+
+
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    #temp1.exr -format exr16 temp.exr 
+
+##    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
+    
+##     -ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \    
+##     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \ 
+##display temp.exr 
+#cp temp.exr $LUTSLOT.exr
+
+
+## Extract PQ shaper 3D LUT  ACES v0.7.1
+#rm -fv $LUTSLOT.spi3d
+#ociolutimage --extract --cubesize 100 --maxwidth 1000 --input $LUTSLOT.exr \
+  #--output $LUTNAME".spi3d" 
+#cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
+
+
+#if [ "$usePython" = false ]; then
+   #TEST $LUTNAME $LUTSLOT
+#fi
+
+
+#if [ "$usePython" = true ]; then
+#pushd .
+#cd $EDRHOME/ACES/HPD/python
+#echo $PWD
+#python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   #-o 3D.v011.v071.$LUTNAME.ctf  &
+#popd
+#fi
+
+## Demos HDR w/LMT
+## $EDRHOME/Tools/demos/nugget/HDR_CPU
+## infiles, outfiles, first_frame, last_frame, odt_type(1=GD10_Rec709_MDR, 2=GD10_p3_d60_HDR)
+
+#LUTNAME="LMT_GaryDemos10_P3_D60_PQP3D65_HDR"
+#LUTSLOT="ACES_PQ_2_ODT_LUT"
+#PEAK=1350.0
+#PEAKGAMMA=1100.0
+#ociolutimage --generate --cubesize 100 --maxwidth 1000 --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/transforms/ctl/lmt/lmt_aces_v0.1.1.ctl \
+         #lutimagePQ.exr $LUTSLOT"x.exr"
+ 
+
+#$EDRHOME/Tools/demos/nugget/HDR_CPU $LUTSLOT"x.exr" $LUTSLOT.exr 0 0 2
+#cp $LUTSLOT.exr temp0.exr
+
+##### SETUP FOR ACES V071:  
+### Set Path for ACES v1
+#CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+#####
+
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    #$LUTSLOT.exr -format exr16 temp1.exr
+##display temp1.exr &
+
+
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    #temp1.exr -format exr16 temp.exr 
+
+##    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
+
+##     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \    
+##display temp.exr &
+#cp temp.exr $LUTSLOT.exr
+
+
+## Extract PQ shaper 3D LUT  ACES v0.7.1
+#rm -fv $LUTSLOT.spi3d
+#ociolutimage --extract --cubesize 100 --maxwidth 1000 --input $LUTSLOT.exr \
+  #--output $LUTNAME".spi3d" 
+#cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
+
+
+#if [ "$usePython" = false ]; then
+   #TESTLMT $LUTNAME $LUTSLOT
+#fi
+
+
+#if [ "$usePython" = true ]; then
+#pushd .
+#cd $EDRHOME/ACES/HPD/python
+#echo $PWD
+#python convertLUTtoCLF.py -i $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   #-o 3D.v011.v071.$LUTNAME.ctf  &
+#popd
+#fi
 
 
 ## Rec2020 PQ
