@@ -3,7 +3,7 @@ set -x
 #  !!!
 # Use python to make ctf?
 #
-usePython=true
+usePython=false
 
 # Setup Output Directory
 OUTDIR="TEST_LUTS"

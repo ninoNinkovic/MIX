@@ -10,7 +10,7 @@ c1=0
 CMax=4
 
 # Setup Output Directory
-OUTDIR="TEST_LUTS"
+OUTDIR="TEST_Verify"
 if [ "$usePython" = false ]; then
 	rm -rfv $OUTDIR
 	mkdir -p $OUTDIR/Compare
@@ -73,12 +73,12 @@ num=0
 
       
 FILES=( \
+        "ICAS_X300/SVU_16013_CTM_156479.002883gd01.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.000115gd01.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.000505gd01.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.000975gd01.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.002393gd01.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.002523gd01.exr" \
-        "ICAS_X300/SVU_16013_CTM_156479.002883gd01.exr" \
       )      
 
 
@@ -133,12 +133,11 @@ num=0
 
       
 FILES=( \
-        "ICAS_X300/SVU_16013_CTM_156479.000115gd02.exr" \
+        "ICAS_X300/SVU_16013_CTM_156479.002883gd02.exr" \        "ICAS_X300/SVU_16013_CTM_156479.000115gd02.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.000505gd02.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.000975gd02.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.002393gd02.exr" \
         "ICAS_X300/SVU_16013_CTM_156479.002523gd02.exr" \
-        "ICAS_X300/SVU_16013_CTM_156479.002883gd02.exr" \
       )      
 
 
@@ -1004,7 +1003,7 @@ fi
 #popd
 #fi   
 
-
+exit
 # make jpgs
 for frame in $OUTDIR/*tiff
 do

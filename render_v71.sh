@@ -1,7 +1,9 @@
 set -x
 
+rm -rfv v071 v071G24 v071LinearG24
 mkdir v071
 mkdir v071G24
+mkdir v071LinearG24
 
 
 
@@ -9,7 +11,7 @@ mkdir v071G24
 
 # find all exr files
 c1=0
-CMax=2
+CMax=4
 num=0
 
 
@@ -28,6 +30,7 @@ FUDGE="1.11"
 CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
 ####
 
+#for filename in ICAS_X300/*2883gd01.exr ; do
 for filename in ICAS_X300/*gd01.exr ; do
 
 
@@ -46,16 +49,34 @@ if [ $c1 -le $CMax ]; then
 
 ( \
 ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
     -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
     -ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA\
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-         $filename v071/$cFile".exr"; \
+         $filename -format exr16 v071/$cFile".exr"; \
 ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/CTL/null.ctl \
          v071/$cFile".exr" -format tiff16 v071G24/$cFile".tiff"; \
-) &
+ctlrender -force \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    -ctl $EDRHOME/ACES/CTL/odt_P3D65_Linear.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+         $filename -format exr16 v071LinearG24/$cFile".exr"; \
+)  &
+
+#( \
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    #-ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+         #$filename -format exr16 v071/$cFile".exr"; \
+#ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/null.ctl \
+         #v071/$cFile".exr" -format tiff16 v071G24/$cFile".tiff"; \
+#) &
+
+#     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA\
+
 
 c1=$[$c1 +1]
 fi

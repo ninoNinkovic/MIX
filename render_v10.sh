@@ -1,15 +1,16 @@
 set -x
 
-
+rm -fv v10 v10G24 v10LinearG24
 mkdir v10
 mkdir v10G24
+mkdir v10LinearG24
 
 
 
 
 # find all exr files
 c1=0
-CMax=2
+CMax=4
 num=0
 
 
@@ -51,8 +52,13 @@ ctlrender -force \
       -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA -param1 legalRange 0  \
          $filename v10/$cFile".exr"; \
 ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/CTL/null.ctl \
                v10/$cFile".exr" -format tiff16 v10G24/$cFile".tiff"; \
+ctlrender -force \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/CTLa1/ODT.Academy.P3D65_Linear_1000nits.a1.0.0.ctl  \
+         $filename v10LinearG24/$cFile".exr"; \
 ) &
 
 c1=$[$c1 +1]
