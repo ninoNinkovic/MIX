@@ -399,17 +399,18 @@ popd
 fi
 
 
+
+
 #
 # Nugget default
 #
-# Demos HDR w/o LMT
+# Demos HDR w/o LMT  w/PQ
 # $EDRHOME/Tools/demos/nugget/HDR_CPU
 # infiles, outfiles, first_frame, last_frame, odt_type(1=GD10_Rec709_MDR, 2=GD10_p3_d60_HDR)
 
-LUTNAME="GaryDemos10_P3D65_HDR_Gamma24"
+LUTNAME="GaryDemos10_P3D60_HDR_Gamma24"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
-PEAK=1350.0
-PEAKGAMMA=1250.0
+PEAKGAMMA=1103.407
 ociolutimage --generate --cubesize 100 --maxwidth 1000 --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 
 $EDRHOME/Tools/demos/nugget/HDR_CPU lutimagePQ.exr $LUTSLOT.exr 0 0 2
@@ -426,16 +427,10 @@ ctlrender -force \
 
 
 ctlrender -force \
-    -ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \
     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
     temp1.exr -format exr16 temp.exr 
 
-#    -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \
-    
-#     -ctl $EDRHOME/ACES/CTL/P3D60Gamma24-2-PQD65P3.ctl -param1 peak $PEAK  \    
-#     -ctl $EDRHOME/ACES/CTL/PQ2Gamma.ctl -param1 CLIP $PEAKGAMMA -param1 DISPGAMMA 2.4 \ 
-#display temp.exr 
 cp temp.exr $LUTSLOT.exr
 
 
@@ -446,9 +441,9 @@ ociolutimage --extract --cubesize 100 --maxwidth 1000 --input $LUTSLOT.exr \
 cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
 
 
-#if [ "$usePython" = false ]; then
-   #TEST $LUTNAME $LUTSLOT
-#fi
+if [ "$usePython" = false ]; then
+   TESTv71 $LUTNAME $LUTSLOT
+fi
 
 
 if [ "$usePython" = true ]; then
@@ -1003,12 +998,11 @@ fi
 #popd
 #fi   
 
-exit
 # make jpgs
 for frame in $OUTDIR/*tiff
 do
-convert $frame -quality 90 ${frame%tiff}jpg
-rm -fv $frame
+convert $frame -resize 50% -quality 90 ${frame%tiff}jpg
+#rm -fv $frame
 done      
         
        
