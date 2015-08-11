@@ -35,21 +35,21 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile".exr"; \
+    display $OUTDIR/$cFile".exr")  &
+    
 #(ctlrender -force -verbose \
     #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
+    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
     #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
     #$filename \
     #-format exr16 $OUTDIR/$cFile".exr"; \
     #display $OUTDIR/$cFile".exr")  &
-    
-(ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
-    $filename \
-    -format exr16 $OUTDIR/$cFile".exr"; \
-    display $OUTDIR/$cFile".exr")  &    
 
 c1=$[$c1 +1]
 fi
@@ -86,21 +86,21 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v71.exr"; \
+    display $OUTDIR/$cFile"-v71.exr")  &
+    
 #(ctlrender -force -verbose \
     #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
+    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
     #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
     #$filename \
     #-format exr16 $OUTDIR/$cFile"-v71.exr"; \
     #display $OUTDIR/$cFile"-v71.exr")  &
-    
-(ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
-    $filename \
-    -format exr16 $OUTDIR/$cFile"-v71.exr"; \
-    display $OUTDIR/$cFile"-v71.exr")  &    
 
 c1=$[$c1 +1]
 fi
@@ -1082,6 +1082,8 @@ for frame in $OUTDIR/*tiff
 do
 #convert $frame -resize 50% -quality 90 ${frame%tiff}jpg
 #rm -fv $frame
+pwd
+
 done      
         
        
