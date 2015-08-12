@@ -35,21 +35,21 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
-(ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
-    $filename \
-    -format exr16 $OUTDIR/$cFile".exr"; \
-    display $OUTDIR/$cFile".exr")  &
-    
 #(ctlrender -force -verbose \
     #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
+    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
     #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
     #$filename \
     #-format exr16 $OUTDIR/$cFile".exr"; \
     #display $OUTDIR/$cFile".exr")  &
+    
+##(ctlrender -force -verbose \
+    ##-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    ##-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
+    ##-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    ##$filename \
+    ##-format exr16 $OUTDIR/$cFile".exr"; \
+    ##display $OUTDIR/$cFile".exr")  &
 
 c1=$[$c1 +1]
 fi
@@ -86,21 +86,21 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
-(ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
-    $filename \
-    -format exr16 $OUTDIR/$cFile"-v71.exr"; \
-    display $OUTDIR/$cFile"-v71.exr")  &
-    
 #(ctlrender -force -verbose \
     #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
+    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
     #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
     #$filename \
     #-format exr16 $OUTDIR/$cFile"-v71.exr"; \
     #display $OUTDIR/$cFile"-v71.exr")  &
+    
+##(ctlrender -force -verbose \
+    ##-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    ##-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
+    ##-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
+    ##$filename \
+    ##-format exr16 $OUTDIR/$cFile"-v71.exr"; \
+    ##display $OUTDIR/$cFile"-v71.exr")  &
 
 c1=$[$c1 +1]
 fi
@@ -286,6 +286,47 @@ SC
 
 CUBE=100
 
+#
+# ACES v0.7.1 P3D65 with PQ 1000 nits
+#
+LUTNAME="ACESv71_P3D65_PQ1000"
+LUTSLOT="ACES_PQ_2_ODT_LUT"
+GAMMA="2.4"
+GAMMA_MAX="1000.0"
+MAX="1000.0"
+FUDGE="1.0"
+#### SETUP FOR ACES V071:  
+## Set Path for ACES v1
+CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+####
+ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
+ctlrender -force \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt.ctl \
+    -ctl $EDRHOME/ACES/CTL/odt_PQnk10kP3D65_FULL.ctl -param1 MAX $MAX -param1 FUDGE $FUDGE -param1 ALARM 1 \
+         lutimagePQ.exr $LUTSLOT.exr  
+
+# Extract PQ shaper 3D LUT  ACES v0.7.1
+rm -fv $LUTSLOT.spi3d
+ociolutimage --extract --cubesize $CUBE --input $LUTSLOT.exr \
+  --output $LUTNAME".spi3d"
+cp -fv $LUTNAME".spi3d"  $EDRHOME/OCIO_CONFIG/luts/$LUTSLOT.spi3d
+
+
+if [ "$usePython" = false ]; then
+   TESTv71 $LUTNAME $LUTSLOT
+fi
+
+
+#if [ "$usePython" = true ]; then
+pushd .
+#cd $EDRHOME/ACES/HPD/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+echo $PWD
+rm -fv 3D.$LUTNAME.ctf
+python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
+   -c 3D.$LUTNAME.ctf  &
+popd
+#fi
 
 #
 # ACES v1 P3D65 with Gamma 2.4 800 nits
@@ -319,7 +360,8 @@ fi
 
 if [ "$usePython" = true ]; then
 pushd .
-cd $EDRHOME/ACES/HPD/python/aces
+#cd $EDRHOME/ACES/HPD/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
@@ -368,6 +410,9 @@ python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
    -c 3D.$LUTNAME.ctf  &
 popd
 fi
+
+
+
 
 
 #
