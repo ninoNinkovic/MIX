@@ -35,21 +35,50 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
-#(ctlrender -force -verbose \
-    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
-    #-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
-    #$filename \
-    #-format exr16 $OUTDIR/$cFile".exr"; \
-    #display $OUTDIR/$cFile".exr")  &
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v1-DCI.exr")  &
     
-##(ctlrender -force -verbose \
-    ##-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    ##-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
-    ##-ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
-    ##$filename \
-    ##-format exr16 $OUTDIR/$cFile".exr"; \
-    ##display $OUTDIR/$cFile".exr")  &
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v1-D60.exr")  &
+
+c1=$[$c1 +1]
+fi
+
+if [ $c1 = $CMax ]; then
+for job in `jobs -p`
+do
+echo $job
+wait $job 
+done
+c1=0
+fi
+
+done
+
+for filename in $EDRDATA/EXR/JH/DCDM_tests/*tif; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.tif}"
+
+if [ $c1 -le $CMax ]; then
+
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/dcdm/InvODT.Academy.DCDM.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v1-DCDM.exr")  &
+    
 
 c1=$[$c1 +1]
 fi
@@ -86,21 +115,51 @@ for filename in ~/Dropbox/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
-#(ctlrender -force -verbose \
-    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
-    #-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
-    #$filename \
-    #-format exr16 $OUTDIR/$cFile"-v71.exr"; \
-    #display $OUTDIR/$cFile"-v71.exr")  &
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v71-DCI.exr")  &
     
-##(ctlrender -force -verbose \
-    ##-ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    ##-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
-    ##-ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
-    ##$filename \
-    ##-format exr16 $OUTDIR/$cFile"-v71.exr"; \
-    ##display $OUTDIR/$cFile"-v71.exr")  &
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v71-D60.exr")  &
+
+c1=$[$c1 +1]
+fi
+
+if [ $c1 = $CMax ]; then
+for job in `jobs -p`
+do
+echo $job
+wait $job 
+done
+c1=0
+fi
+
+done
+
+for filename in $EDRDATA/EXR/JH/DCDM_tests/*tif; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.tif}"
+
+if [ $c1 -le $CMax ]; then
+
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/dcdm/odt_dcdm_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/rrt/rrt_inv.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v71-DCDM.exr")  &
+    
+
 
 c1=$[$c1 +1]
 fi
@@ -134,16 +193,8 @@ function  SC {
 
 num=0
 
-      
-FILES=( \
-        "TEST_F7/reel_2ab_dom.0000260-v71.exr" \
-        "TEST_F7/reel_2ab_dom.0014945-v71.exr" \
-        "TEST_F7/reel_5ab_dom.0005366-v71.exr" \
-      )      
 
-
-
-for filename in ${FILES[@]}; do
+for filename in $OUTDIR/*.exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
@@ -160,16 +211,8 @@ function  TESTv71 {
 
 num=0
 
-      
-FILES=( \
-        "TEST_F7/reel_2ab_dom.0000260-v71.exr" \
-        "TEST_F7/reel_2ab_dom.0014945-v71.exr" \
-        "TEST_F7/reel_5ab_dom.0005366-v71.exr" \
-      )      
 
-
-
-for filename in ${FILES[@]}; do
+for filename in $OUTDIR/*v71*.exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
@@ -217,18 +260,9 @@ function  TESTv10 {
 
 num=0
 
-      
-FILES=( \
-        "TEST_F7/reel_2ab_dom.0000260.exr" \
-        "TEST_F7/reel_2ab_dom.0014945.exr" \
-        "TEST_F7/reel_5ab_dom.0005366.exr" \
-      )      
-
-     
 
 
-
-for filename in ${FILES[@]}; do
+for filename in $OUTDIR/*v1*.exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
