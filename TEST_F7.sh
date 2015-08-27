@@ -1,9 +1,5 @@
 set -x
 
-#  !!!
-# Use python to make ctf?
-#
-usePython=false
 
 # setup for parallel
 c1=0
@@ -11,8 +7,21 @@ CMax=7
 
 # Setup Output Directory
 OUTDIR="TEST_F7"
+
+#  !!!
+# Use python to make ctf?
+#
+usePython=false
+
+#
+# Skip making EXRs:
+#
+if false; then
+
+
+# clean output directory 
 if [ "$usePython" = false ]; then
-	rm -fv $OUTDIR/*tiff
+	rm -fv $OUTDIR/*
 	mkdir -p $OUTDIR
 fi
 
@@ -26,7 +35,7 @@ fi
 CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 
-for filename in ~/Dropbox/*dpx; do
+for filename in ~/Dropbox/F7Test/dpx/*dpx; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
@@ -106,7 +115,7 @@ done
 ## Set Path for ACES v71
 CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
 ####
-for filename in ~/Dropbox/*dpx; do
+for filename in ~/Dropbox/F7Test/dpx/*dpx; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
@@ -122,6 +131,7 @@ if [ $c1 -le $CMax ]; then
     $filename \
     -format exr16 $OUTDIR/$cFile"-v71-DCI.exr")  &
     
+   
 (ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
     -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60_inv.ctl \
@@ -182,7 +192,44 @@ echo $job
 wait $job 
 done
 
-ls -l F7
+
+
+# Flip v71 DCI files to v1 via LMT
+#### SETUP FOR ACES V1:  
+## Set Path for ACES v1
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+####
+
+for filename in $OUTDIR/*v71*DCI*.exr; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.exr}"
+
+if [ $c1 -le $CMax ]; then
+
+(ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/lmt/LMT.Academy.ACES_0_7_1.a1.0.0.ctl \
+    $filename \
+    -format exr16 $OUTDIR/$cFile"-v_1LMT.exr")  &
+    
+
+
+c1=$[$c1 +1]
+fi
+
+if [ $c1 = $CMax ]; then
+for job in `jobs -p`
+do
+echo $job
+wait $job 
+done
+c1=0
+fi
+
+done
+
 
   
 #
@@ -205,6 +252,11 @@ $EDRHOME/Tools/demos/sc/sigma_compare_PQ $filename $filename | tee $OUTDIR/$cFil
 done
 }
 
+
+#
+# End Skip making EXRs:
+#
+fi
 
 function  TESTv71 {
 # find all exr files
