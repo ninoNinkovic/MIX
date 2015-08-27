@@ -7,7 +7,7 @@ usePython=false
 
 # setup for parallel
 c1=0
-CMax=4
+CMax=7
 
 # Setup Output Directory
 OUTDIR="TEST_F7"
