@@ -1,5 +1,47 @@
 set -x
 
+# single file test block
+if false; then
+#### SETUP FOR ACES V1:  
+## Set Path for ACES v1
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+####
+
+#/usr/local/bin/ctlrender -force -ctl InvODT.Academy.DCDM.a1.0.0.ctl -param1 aIn 1.0 T_01_whiteDCI_DCDM.tif InvertWhiteDCI.tif
+#/usr/local/bin/ctlrender -force -ctl InvRRT.a1.0.0.ctl InvertWhiteDCI.tif InvertWhiteDCI_to_ACES.exr
+
+
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/dcdm/InvODT.Academy.DCDM.a1.0.0.ctl -param1 aIn 1.0 \
+     $EDRDATA/EXR/JH/DCDM_tests/T_01_whiteDCI_DCDM.tif InvertWhiteDCI.exr
+     
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+    InvertWhiteDCI.exr  whiteDCI_ODTsRT-v1-DCDM-PQ.tif     
+
+
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+     InvertWhiteDCI.exr  InvRRTWhiteDCI.exr
+
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+    InvRRTWhiteDCI.exr  whiteDCI_DCDM-v1-DCDM-PQ.tif
+ 
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+ TEST_F7/T_01_whiteDCI_DCDM-v1-DCDM.exr  T_01_whiteDCI_DCDM-v1-DCDM-PQ.tif
+ 
+ctlrender -force -verbose  \
+    -ctl $EDRHOME/ACES/CTLa1/PQ2Gamma.ctl \
+      -param1 CLIP 1000.0 -param1 DISPGAMMA 2.4 -param1 legalRange 0  \
+    T_01_whiteDCI_DCDM-v1-DCDM-PQ.tif   T_01_whiteDCI_DCDM-v1-DCDM-Gamma24.tif
+ 
+exit
+fi
+
 
 # setup for parallel
 c1=0
@@ -264,7 +306,8 @@ function  TESTv71 {
 num=0
 
 
-for filename in $OUTDIR/*v71*.exr; do
+#for filename in $OUTDIR/*v71*.exr; do
+for filename in $OUTDIR/*99999*.exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
@@ -359,7 +402,6 @@ done
 
 
 
-SC
 
 
 
@@ -367,7 +409,7 @@ SC
 # Create LUTS
 #
 
-CUBE=100
+CUBE=129
 
 #
 # ACES v0.7.1 P3D65 with PQ 1000 nits
