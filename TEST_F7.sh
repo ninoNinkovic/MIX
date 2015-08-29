@@ -2,6 +2,19 @@ set -x
 
 # single file test block
 if false; then
+
+#### SETUP FOR ACES V071:  
+## Set Path for ACES v71
+CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+####
+
+ctlrender -force -verbose \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/dcdm/odt_dcdm_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60.ctl \
+     $EDRDATA/EXR/JH/DCDM_tests/T_01_whiteDCI_DCDM.tif T_01_whiteD60.exr
+
+
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
 CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
@@ -12,22 +25,22 @@ CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/C
 
 
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/dcdm/InvODT.Academy.DCDM.a1.0.0.ctl -param1 aIn 1.0 \
-     $EDRDATA/EXR/JH/DCDM_tests/T_01_whiteDCI_DCDM.tif InvertWhiteDCI.exr
+    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl -param1 aIn 1.0 \
+     T_01_whiteD60.exr InvertWhiteD60.exr
      
 ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
-    InvertWhiteDCI.exr  whiteDCI_ODTsRT-v1-DCDM-PQ.tif     
+    InvertWhiteD60.exr  whiteDCI_ODTsRT-v1-DCDM2D60-PQ.tif     
 
 
 ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
-     InvertWhiteDCI.exr  InvRRTWhiteDCI.exr
+     InvertWhiteD60.exr  InvRRTWhiteD60.exr
 
 ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
     -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
-    InvRRTWhiteDCI.exr  whiteDCI_DCDM-v1-DCDM-PQ.tif
+    InvRRTWhiteD60.exr  whiteDCI_DCDM2D60-v1-D60-PQ.tif
  
 ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
@@ -38,6 +51,11 @@ ctlrender -force -verbose  \
     -ctl $EDRHOME/ACES/CTLa1/PQ2Gamma.ctl \
       -param1 CLIP 1000.0 -param1 DISPGAMMA 2.4 -param1 legalRange 0  \
     T_01_whiteDCI_DCDM-v1-DCDM-PQ.tif   T_01_whiteDCI_DCDM-v1-DCDM-Gamma24.tif
+    
+ctlrender -force -verbose  \
+    -ctl $EDRHOME/ACES/CTLa1/PQ2Gamma.ctl \
+      -param1 CLIP 1000.0 -param1 DISPGAMMA 2.4 -param1 legalRange 0  \
+    whiteDCI_DCDM2D60-v1-D60-PQ.tif   whiteDCI_DCDM2D60-v1-D60-Gamma24.tif    
  
 exit
 fi
@@ -46,6 +64,7 @@ fi
 # setup for parallel
 c1=0
 CMax=7
+num=0
 
 # Setup Output Directory
 OUTDIR="TEST_F7"
@@ -55,10 +74,30 @@ OUTDIR="TEST_F7"
 #
 usePython=false
 
+
+function  SC {
+# find all exr files
+
+num=0
+
+
+for filename in $OUTDIR/*.exr; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.exr}"
+$EDRHOME/Tools/demos/sc/sigma_compare_PQ $filename $filename | tee $OUTDIR/$cFile".log"
+
+done
+}
+
+
+
 #
-# Skip making EXRs:
+# Skip making EXRs: with false
 #
-if false; then
+if true; then
 
 
 # clean output directory 
@@ -66,6 +105,54 @@ if [ "$usePython" = false ]; then
 	rm -fv $OUTDIR/*
 	mkdir -p $OUTDIR
 fi
+
+
+#
+# Make v71 RT DPX
+#
+#### SETUP FOR ACES V071:  
+## Set Path for ACES v71
+CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
+####
+mkdir ~/Dropbox/F7Test/v7RT
+rm -fv ~/Dropbox/F7Test/v7RT/*
+
+for filename in ~/Dropbox/F7Test/dpx/*dpx; do
+
+ # file name w/extension e.g. 000111.tiff
+ cFile="${filename##*/}"
+ # remove extension
+ cFile="${cFile%.dpx}"
+
+if [ $c1 -le $CMax ]; then
+
+(ctlrender -force \
+    -ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
+    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60.ctl \
+    $filename \
+    -format exr16 ~/Dropbox/F7Test/v7RT/$cFile"-v7RT.exr")  &
+    
+c1=$[$c1 +1]
+fi
+
+if [ $c1 = $CMax ]; then
+for job in `jobs -p`
+do
+echo $job
+wait $job 
+done
+c1=0
+fi
+
+done
+
+for job in `jobs -p`
+do
+echo $job
+wait $job 
+done
+
 
 
 #
@@ -77,12 +164,13 @@ fi
 CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 
-for filename in ~/Dropbox/F7Test/dpx/*dpx; do
+#for filename in ~/Dropbox/F7Test/dpx/*dpx; do
+for filename in ~/Dropbox/F7Test/v7RT/*exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
  # remove extension
- cFile="${cFile%.dpx}"
+ cFile="${cFile%.exr}"
 
 if [ $c1 -le $CMax ]; then
 
@@ -272,33 +360,19 @@ fi
 
 done
 
-
-  
-#
-# Functions
-# 
-function  SC {
-# find all exr files
-
-num=0
-
-
-for filename in $OUTDIR/*.exr; do
-
- # file name w/extension e.g. 000111.tiff
- cFile="${filename##*/}"
- # remove extension
- cFile="${cFile%.exr}"
-$EDRHOME/Tools/demos/sc/sigma_compare_PQ $filename $filename | tee $OUTDIR/$cFile".log"
-
-done
-}
-
+# run sigmacompare
+SC
 
 #
 # End Skip making EXRs:
 #
 fi
+  
+#
+# Functions
+# 
+
+
 
 function  TESTv71 {
 # find all exr files
