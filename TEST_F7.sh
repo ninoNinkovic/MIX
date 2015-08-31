@@ -63,7 +63,7 @@ fi
 
 # setup for parallel
 c1=0
-CMax=7
+CMax=4
 num=0
 
 # Setup Output Directory
@@ -114,8 +114,10 @@ fi
 ## Set Path for ACES v71
 CTL_MODULE_PATH="/usr/local/lib/CTL:$EDRHOME/ACES/CTL:$EDRHOME/ACES/transforms/ctl/utilities"
 ####
-mkdir ~/Dropbox/F7Test/v7RT
-rm -fv ~/Dropbox/F7Test/v7RT/*
+#mkdir ~/Dropbox/F7Test/v7RT
+#rm -fv ~/Dropbox/F7Test/v7RT/*
+mkdir ~/Dropbox/F7Test/v7RTB
+rm -fv ~/Dropbox/F7Test/v7RTB/*
 
 for filename in ~/Dropbox/F7Test/dpx/*dpx; do
 
@@ -126,12 +128,18 @@ for filename in ~/Dropbox/F7Test/dpx/*dpx; do
 
 if [ $c1 -le $CMax ]; then
 
+#(ctlrender -force \
+    #-ctl $EDRHOME/ACES/CTL/nullA.ctl \
+    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
+    #-ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60.ctl \
+    #$filename \
+    #-format exr16 ~/Dropbox/F7Test/v7RT/$cFile"-v7RT.exr")  &
+    
 (ctlrender -force \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3dci_inv.ctl \
-    -ctl $EDRHOME/ACES/transforms/ctl/odt/p3/odt_p3d60.ctl \
+    -ctl $EDRHOME/ACES/CTL/balanceDCI2D60.ctl \
     $filename \
-    -format exr16 ~/Dropbox/F7Test/v7RT/$cFile"-v7RT.exr")  &
+    -format exr16 ~/Dropbox/F7Test/v7RTB/$cFile"-v7RTB.exr") &
     
 c1=$[$c1 +1]
 fi
@@ -165,7 +173,7 @@ CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/C
 ####
 
 #for filename in ~/Dropbox/F7Test/dpx/*dpx; do
-for filename in ~/Dropbox/F7Test/v7RT/*exr; do
+for filename in ~/Dropbox/F7Test/v7RTB/*exr; do
 
  # file name w/extension e.g. 000111.tiff
  cFile="${filename##*/}"
