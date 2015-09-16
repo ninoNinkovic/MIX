@@ -17,7 +17,7 @@ ctlrender -force -verbose \
 
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
-CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev-1.0/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 
 #/usr/local/bin/ctlrender -force -ctl InvODT.Academy.DCDM.a1.0.0.ctl -param1 aIn 1.0 T_01_whiteDCI_DCDM.tif InvertWhiteDCI.tif
@@ -25,26 +25,26 @@ CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/C
 
 
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl -param1 aIn 1.0 \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl -param1 aIn 1.0 \
      T_01_whiteD60.exr InvertWhiteD60.exr
      
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
     InvertWhiteD60.exr  whiteDCI_ODTsRT-v1-DCDM2D60-PQ.tif     
 
 
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
      InvertWhiteD60.exr  InvRRTWhiteD60.exr
 
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
     InvRRTWhiteD60.exr  whiteDCI_DCDM2D60-v1-D60-PQ.tif
  
 ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/hdr_pq/ODT.Academy.P3D60_PQ_1000nits.a1.0.0.ctl \
  TEST_F7/T_01_whiteDCI_DCDM-v1-DCDM.exr  T_01_whiteDCI_DCDM-v1-DCDM-PQ.tif
  
 ctlrender -force -verbose  \
@@ -169,7 +169,7 @@ done
 
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
-CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev-1.0/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 
 #for filename in ~/Dropbox/F7Test/dpx/*dpx; do
@@ -184,15 +184,15 @@ if [ $c1 -le $CMax ]; then
 
 (ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/p3/InvODT.Academy.P3DCI_48nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
     $filename \
     -format exr16 $OUTDIR/$cFile"-v1-DCI.exr")  &
     
 (ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/p3/InvODT.Academy.P3D60_48nits.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
     $filename \
     -format exr16 $OUTDIR/$cFile"-v1-D60.exr")  &
 
@@ -221,8 +221,8 @@ if [ $c1 -le $CMax ]; then
 
 (ctlrender -force -verbose \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/odt/dcdm/InvODT.Academy.DCDM.a1.0.0.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/odt/dcdm/InvODT.Academy.DCDM.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/InvRRT.a1.0.0.ctl \
     $filename \
     -format exr16 $OUTDIR/$cFile"-v1-DCDM.exr")  &
     
@@ -335,7 +335,7 @@ done
 # Flip v71 DCI files to v1 via LMT
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
-CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev-1.0/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 
 for filename in $OUTDIR/*v71*DCI*.exr; do
@@ -348,7 +348,7 @@ for filename in $OUTDIR/*v71*DCI*.exr; do
 if [ $c1 -le $CMax ]; then
 
 (ctlrender -force -verbose \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/lmt/LMT.Academy.ACES_0_7_1.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/lmt/LMT.Academy.ACES_0_7_1.a1.0.0.ctl \
     $filename \
     -format exr16 $OUTDIR/$cFile"-v_1LMT.exr")  &
     
@@ -528,7 +528,7 @@ fi
 #if [ "$usePython" = true ]; then
 pushd .
 #cd $EDRHOME/ACES/HPD/python/aces
-cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev-1.0/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
@@ -546,12 +546,12 @@ GAMMA_MAX="1000.0"
 MAX="1000.0"
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
-CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev-1.0/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 ctlrender -force \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/RRT.a1.0.0.ctl \
     -ctl $EDRHOME/ACES/CTLa1/ODT.Academy.P3D65_PQ_1000nits.a1.0.0.ctl  \
          lutimagePQ.exr $LUTSLOT.exr  
 
@@ -569,7 +569,7 @@ fi
 if [ "$usePython" = true ]; then
 pushd .
 #cd $EDRHOME/ACES/HPD/python/aces
-cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev-1.0/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
@@ -587,12 +587,12 @@ GAMMA_MAX="1000.0"
 MAX="1000.0"
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
-CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
+CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev-1.0/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
 ####
 ociolutimage --generate --cubesize $CUBE --colorconvert PQShaper exrScenePQ  --output lutimagePQ.exr
 ctlrender -force \
     -ctl $EDRHOME/ACES/CTL/nullA.ctl \
-    -ctl $EDRHOME/ACES/aces-dev/transforms/ctl/rrt/RRT.a1.0.0.ctl \
+    -ctl $EDRHOME/ACES/aces-dev-1.0/transforms/ctl/rrt/RRT.a1.0.0.ctl \
     -ctl $EDRHOME/ACES/CTLa1/ODT.Academy.P3D65_PQ_1000nits.a1.0.0.ctl  \
     -ctl $EDRHOME/ACES/CTLa1/PQ2Gamma.ctl \
       -param1 CLIP $GAMMA_MAX -param1 DISPGAMMA $GAMMA -param1 legalRange 0  \
@@ -612,7 +612,7 @@ fi
 if [ "$usePython" = true ]; then
 pushd .
 #cd $EDRHOME/ACES/HPD/python/aces
-cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev-1.0/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
@@ -656,7 +656,7 @@ fi
 if [ "$usePython" = true ]; then
 pushd .
 #cd $EDRHOME/ACES/HPD/python/aces
-cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev-1.0/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
@@ -717,7 +717,7 @@ fi
 if [ "$usePython" = true ]; then
 pushd .
 #cd $EDRHOME/ACES/HPD/python/aces
-cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev/python/aces
+cd $EDRHOME/ACES/Patrick/LUT_TO_CLF/aces-dev-1.0/python/aces
 echo $PWD
 rm -fv 3D.$LUTNAME.ctf
 python convertLUTtoCLF.py -l $EDRDATA/EXR/MIX/$LUTNAME".spi3d" \
