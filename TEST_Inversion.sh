@@ -35,8 +35,8 @@ done
 
 
 
-#rm -fv $OUTDIR/*tiff
-rm -fv $OUTDIR/*
+rm -fv $OUTDIR/*tiff
+#rm -fv $OUTDIR/*
 
 
 #
@@ -204,7 +204,7 @@ fi
 LUTNAME="ACESv1_P3D65_Gamma24"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
 GAMMA="2.4"
-GAMMA_MAX="1000.0"
+GAMMA_MAX="6000.0"
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
 CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
