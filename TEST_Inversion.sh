@@ -3,7 +3,7 @@ set -x
 
 # setup for parallel
 c1=0
-CMax=4
+CMax=7
 num=0
 
 # Setup Output Directory
@@ -69,7 +69,8 @@ if [ $c1 -le $CMax ]; then
     -ctl $EDRHOME/ACES/CTLa1/InvP3DCI_RRT_ODT.ctl \
     $filename \
     -format exr16 $OUTDIR/$cFile"-v1-DCI_HueRestore.exr" )  &
-    
+        
+  
 c1=$[$c1 +1]
 fi
 
@@ -203,7 +204,7 @@ fi
 LUTNAME="ACESv1_P3D65_Gamma24"
 LUTSLOT="ACES_PQ_2_ODT_LUT"
 GAMMA="2.4"
-GAMMA_MAX="600.0"
+GAMMA_MAX="1000.0"
 #### SETUP FOR ACES V1:  
 ## Set Path for ACES v1
 CTL_MODULE_PATH="$EDRHOME/ACES/aces-dev/transforms/ctl/utilities:$EDRHOME/ACES/CTLa1"
